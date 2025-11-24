@@ -1,0 +1,26 @@
+[
+  {
+    "service": "Gmail",
+    "username": "my.email@gmail.com",
+    "password": "super_secret_password_123",
+    "notes": "My personal account"
+  },
+  {
+    "service": "GitHub",
+    "username": "dev_user_42",
+    "password": "ghp_abc123def456",
+    "notes": "Work account with 2FA"
+  },
+  {
+    "service": "Netflix",
+    "username": "family.stream@outlook.com", 
+    "password": "movie_night_2024",
+    "notes": "Family plan - 4 users"
+  },
+  {
+    "service": "Bank of Example",
+    "username": "john.doe",
+    "password": "B@nk1ngP@ss",
+    "notes": "Joint account with spouse"
+  }
+]
