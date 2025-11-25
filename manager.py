@@ -8,18 +8,18 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 def generate_and_store_key():
 	if not os.path.isfile("secret.key"):
 		key = Fernet.generate_key()
-		with open("secret.key", "w") as f:
+		with open("secret.key", "wb") as f:
 			f.write(key)
 		return key
 	return None
 
 def load_key():
-	try:
-		with open("secret.key", "r") as f:
+	if os.path.exists("secret.key"):
+		with open("secret.key", "rb") as f:
 			bytes = f.read()
 		return bytes
-	except FileNotFoundError:
-		print("Key not found.")
+	else:
+		raise FileNotFoundError("Key not found.")
 
 def initialize_vault():
 	key = generate_and_store_key()
@@ -28,10 +28,19 @@ def initialize_vault():
 
 def decrypt_vault():
 	key = load_key()
-	with open("vault.dat", "rb") as f:
-		encrypted_data = f.read()
-	cypher_suite = Fernet(key)
-	decrypted_data = cipher_suite.decrypt(encrypted_data)
+	if os.path.exists("vault.dat"):
+		with open("vault.dat", "rb") as f:
+			encrypted_data = f.read()
+	else:
+		raise FileNotFoundError("Vault not found.")
+
+	cipher = Fernet(key)
+	decrypted_data = cipher.decrypt(encrypted_data)
+	return json.loads(decrypted_data)
 
 def encrypt_vault(vault_data, key):
-	
+	json_string = json.dumps(vault_data)
+	cypher = Fernet(key)
+	encrypted_data = cypher.encrypt(json_string)
+	with open("vault.dat", "wb") as f:
+		f.write(encrypted_data)
