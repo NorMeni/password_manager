@@ -10,14 +10,18 @@ def generate_and_store_key():
 		key = Fernet.generate_key()
 		with open("secret.key", "wb") as f:
 			f.write(key)
+		print(f"Generated key: {key}")
 		return key
-	return None
+	else:
+		with open("secret.key", "rb") as f:
+			key = f.read()
+		print(f"Loaded existing key: {key}")
+		return key
 
 def load_key():
 	if os.path.exists("secret.key"):
 		with open("secret.key", "rb") as f:
-			bytes = f.read()
-		return bytes
+			return f.read()
 	else:
 		raise FileNotFoundError("Key not found.")
 
@@ -25,6 +29,7 @@ def initialize_vault():
 	key = generate_and_store_key()
 	vault = []
 	encrypt_vault(vault, key)
+	return key
 
 def decrypt_vault():
 	key = load_key()
@@ -41,6 +46,6 @@ def decrypt_vault():
 def encrypt_vault(vault_data, key):
 	json_string = json.dumps(vault_data)
 	cypher = Fernet(key)
-	encrypted_data = cypher.encrypt(json_string)
+	encrypted_data = cypher.encrypt(json_string.encode('utf-8'))
 	with open("vault.dat", "wb") as f:
 		f.write(encrypted_data)
