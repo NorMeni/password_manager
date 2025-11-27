@@ -1,7 +1,7 @@
 import manager as pm
 import os
 import json
-import gui as gui
+import gui
 
 key = pm.initialize_vault()
 #verify that secret.key and vault.dat were created
@@ -25,4 +25,4 @@ vault.extend(vault_info)
 pm.encrypt_vault(vault, key)
 print(vault)
 
-gui.setup_gui()
+setup_gui()
