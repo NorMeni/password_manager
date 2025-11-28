@@ -60,6 +60,45 @@ class PasswordManagerApp:
 		)
 		save_button.grid(row=4, column=0, columnspan=2, pady=10)
 
+	def on_delete_entry(self, app, listbox):
+		if len(listbox.curselection()) == 0:
+			warning = tk.Toplevel()
+			warning.title('Warning')
+			warning.geometry('400x100')
+			l = ttk.Label(warning, text = "Please select an entry to delete.")
+			l.pack()
+			ok_button = tk.Button(
+				warning,
+				text='OK',
+				command=lambda:warning.destroy()
+			)
+			ok_button.pack()
+		else:
+			items = ""
+			for entry in listbox.curselection():
+				items += f"{self.vault[entry]["service"]}, "
+			warning = tk.Toplevel()
+			warning.title('Warning')
+			l = ttk.Label(warning, text = f"Are you sure you want to delete {items[:-2]}?")
+			l.pack()
+			no_button = tk.Button(
+				warning,
+				text='No',
+				command=lambda:warning.destroy()
+			)
+			yes_button = tk.Button(
+				warning,
+				text='Yes',
+				command=lambda: [warning.destroy(), self.delete_entries(listbox)]
+			)
+			no_button.pack()
+			yes_button.pack()
+
+	def delete_entries(self, listbox):
+		for item in listbox.curselection():
+			del self.vault[item]
+		pm.encrypt_vault(self.vault, self.key)
+		self.refresh_vault_display(listbox)
 def setup_gui():
 	root = tk.Tk()
 	root.title("Password Manager")
@@ -97,5 +136,13 @@ def setup_gui():
 		command=lambda: app.open_add_dialogue(app, listbox)
 	)
 	add_button.pack()
+
+	#delete button
+	del_button = tk.Button(
+		root,
+		text="Delete entry",
+		command=lambda: app.on_delete_entry(app, listbox)
+	)
+	del_button.pack()
 
 	root.mainloop()
