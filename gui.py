@@ -3,9 +3,9 @@ from tkinter import ttk
 import manager as pm
 
 class PasswordManagerApp:
-	def __init__(self):
-		self.key = pm.load_key()
-		self.vault = pm.decrypt_vault()
+	def __init__(self, vault, key):
+		self.key = key
+		self.vault = vault
 
 	def on_add_entry(self, treeview, dialogue, service, username, password):
 		new_entry = {
@@ -18,30 +18,18 @@ class PasswordManagerApp:
 		self.refresh_vault_display(treeview)
 		dialogue.destroy()
 
-	def refresh_vault_display_defunct(self, listbox):
-		display_vault = []
-
-		if len(self.vault) == 0:
-			display_vault.append("No entries")
-		else:
-			for item in self.vault:
-				display_vault.append(f"{item["service"]} - {item["username"]}")
-
-		listbox.delete(0, tk.END)
-		for item in display_vault:
-			listbox.insert(tk.END, item)
 	def refresh_vault_display(self, treeview):
-		display_vault = []
+		for item in treeview.get_children():
+			treeview.delete(item)
 
 		if len(self.vault) == 0:
-			display_vault.append("No entries")
+			treeview.insert('', tk.END, text="No entries found")
 		else:
-			for item in treeview.get_children():
-				treeview.delete(item)
 			for item in self.vault:
 				level1 = treeview.insert('', tk.END, text=f"{item["service"]}")
 				treeview.insert(level1, tk.END, text="Username", values=(f"{item["username"]}"))
 				treeview.insert(level1, tk.END, text="Password", values=(f"{item["password"]}"))
+		pm.encrypt_vault(self.vault, self.key)
 
 	def open_add_dialogue(self, app, treeview):
 		dialogue = tk.Toplevel()
@@ -59,10 +47,6 @@ class PasswordManagerApp:
 		password_entry = tk.Entry(dialogue, show="*")
 		tk.Label(dialogue, text="Password:").grid(row=2, column=0, sticky="w", padx=5, pady=5)
 		password_entry.grid(row=2, column=1, padx=5, pady=5)
-
-		#notes_entry = tk.Text(dialogue, height=4, width=30)
-		#tk.Label(dialogue, text="Notes:").grid(row=3, column=0, sticky="nw", padx=5, pady=5)
-		#notes_entry.grid(row=3, column=1, padx=5, pady=5)
 
 		save_button = tk.Button(
 			dialogue,
@@ -129,7 +113,7 @@ class PasswordManagerApp:
 
 		pm.encrypt_vault(self.vault, self.key)
 		self.refresh_vault_display(treeview)
-def setup_gui():
+def setup_gui(vault, key):
 	root = tk.Tk()
 	root.title("Password Manager")
 
@@ -144,7 +128,7 @@ def setup_gui():
 
 	root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
 
-	app = PasswordManagerApp()
+	app = PasswordManagerApp(vault, key)
 
 	label = ttk.Label(
 		root,
@@ -152,17 +136,25 @@ def setup_gui():
 	)
 	label.pack(padx=10, pady=0, side=tk.TOP, fill=tk.X)
 
-	#initialize list as empty
-	#listbox = tk.Listbox(root)
-	#listbox.pack()
-	#app.refresh_vault_display(listbox)
+	#frame
+	tree_frame = ttk.Frame(root)
+	tree_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-	#listbox.pack(padx=10, pady=10, expand=True, fill=tk.BOTH, side=tk.LEFT)
-
-	treeview = ttk.Treeview(columns=("Username", "Password"))
+	#treeview
+	treeview = ttk.Treeview(tree_frame, columns=("Username", "Password"))
 	app.refresh_vault_display(treeview)
 
-	treeview.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+	#scrollbar
+	scrlbar = ttk.Scrollbar(
+		tree_frame,
+		orient="vertical",
+		command=treeview.yview
+		)
+
+	treeview.configure(yscrollcommand = scrlbar.set)
+
+	scrlbar.pack(side='right', fill='y')
+	treeview.pack(side='left', fill=tk.BOTH, expand=True)
 
 	#button
 	add_button = tk.Button(

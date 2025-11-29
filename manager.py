@@ -15,7 +15,7 @@ def generate_and_store_key():
 	else:
 		with open("secret.key", "rb") as f:
 			key = f.read()
-		print(f"Loaded existing key: {key}")
+		#print(f"Loaded existing key: {key}")
 		return key
 
 def load_key():
@@ -27,8 +27,10 @@ def load_key():
 
 def initialize_vault():
 	key = generate_and_store_key()
-	vault = []
-	encrypt_vault(vault, key)
+
+	if not os.path.exists("vault.dat"):
+		vault = []
+		encrypt_vault(vault, key)
 	return key
 
 def decrypt_vault():
@@ -44,6 +46,7 @@ def decrypt_vault():
 	return json.loads(decrypted_data)
 
 def encrypt_vault(vault_data, key):
+	#print(f"ENCRYPTING: {len(vault_data)} entries: {vault_data}")
 	json_string = json.dumps(vault_data)
 	cypher = Fernet(key)
 	encrypted_data = cypher.encrypt(json_string.encode('utf-8'))

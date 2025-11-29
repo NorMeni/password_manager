@@ -3,26 +3,11 @@ import os
 import json
 import gui as gui
 
-key = pm.initialize_vault()
-#verify that secret.key and vault.dat were created
 
-vault = pm.decrypt_vault()
-print(vault)
-#expected output: []
+def main():
+	key = pm.initialize_vault()
+	vault = pm.decrypt_vault()
+	gui.setup_gui(vault, key)
 
-new_entry = {
-	"service": "Test service",
-	"username": "Test username",
-	"password": "test_pass",
-	"notes": "this is just a test"
-}
-
-if os.path.exists("test_file.JSON"):
-	with open("test_file.JSON", "r") as f:
-		vault_info = json.load(f)
-vault.extend(vault_info)
-
-pm.encrypt_vault(vault, key)
-print(vault)
-
-gui.setup_gui()
+if __name__ == "__main__":
+	main()
